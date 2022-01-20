@@ -30,20 +30,34 @@ app.get("/api", function (req, res) {
   res.json({unix: new Date().getTime(), utc: new Date().toUTCString()});
 });
 
-// send a JSON response to the date "2015-12-25" or unix timestamp "1451001600000"
-app.get("/api/:data", (req,res) => {
-  switch (req.params.data) {
-    case "2015-12-25":
-      res.json({
-        unix: new Date(req.params.data).getTime(),
-        utc: new Date(req.params.data).toUTCString()
-      });
+app.get("/api/:date", (req,res) => {
+  let date = req.params.date.includes('-');
+  switch (date) {
+    case true:
+      if (isNaN(new Date(req.params.date).getTime())){
+        res.json({
+          "error": "Invalid Date"
+        });       
+      } else {
+        res.json({
+          unix: new Date(req.params.date).getTime(),
+          utc: new Date(req.params.date).toUTCString()
+        });
+      }
       break;
-    case "1451001600000":
-      res.json({
-        unix: new Date(req.params.data).getTime(),
-        utc: new Date(req.params.data).toUTCString()
-      });
+    case false:
+      if (req.params.date.indexOf(' ') == -1) {
+        let unixI = parseInt(req.params.date);
+        res.json({
+          unix: new Date(unixI).getTime(),
+          utc: new Date(unixI).toUTCString()
+        });      
+      } else {
+        res.json({
+          unix: new Date(req.params.date).getTime(),
+          utc: new Date(req.params.date).toUTCString()
+        });
+      }
       break;
     default:
       res.json({
@@ -51,9 +65,6 @@ app.get("/api/:data", (req,res) => {
       });
   }
 });
-
-
-
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
